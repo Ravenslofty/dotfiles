@@ -48,6 +48,8 @@ if [ -e /usr/share/git/completion/git-prompt.sh ]; then
     source /usr/share/git/completion/git-prompt.sh
     source /usr/share/git/completion/git-completion.bash
     git_prompt=yes
+
+    GIT_PS1_SHOWDIRTYSTATE=true
 fi
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
