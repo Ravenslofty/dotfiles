@@ -25,10 +25,10 @@ shopt -s checkwinsize
 
 # If set, the pattern "**" used in a pathname expansion context will
 # match all files and zero or more directories and subdirectories.
-#shopt -s globstar
+shopt -s globstar
 
 # make less more friendly for non-text input files, see lesspipe(1)
-#[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
 
 # set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
@@ -39,6 +39,16 @@ fi
 case "$TERM" in
     xterm-color) color_prompt=yes;;
 esac
+
+# the fancy git prompt needs __git_ps1, but not having it gets very
+# annoying, so only use it if we have __git_ps1
+git_prompt=no
+
+if [ -e /usr/share/git/completion/git-prompt.sh ]; then
+    source /usr/share/git/completion/git-prompt.sh
+    source /usr/share/git/completion/git-completion.bash
+    git_prompt=yes
+fi
 
 # uncomment for a colored prompt, if the terminal has the capability; turned
 # off by default to not distract the user: the focus in a terminal window
@@ -57,11 +67,15 @@ if [ -n "$force_color_prompt" ]; then
 fi
 
 if [ "$color_prompt" = yes ]; then
-    PS1='\[\033]0;$TITLEPREFIX:${PWD//[^[:ascii:]]/?}\007\]\n\[\033[32m\]\u@\h \[\033[35m\]$MSYSTEM \[\033[33m\]\w\[\033[36m\]`__git_ps1`\[\033[0m\]\n$ '
+    if [ "$git_prompt" = yes ]; then
+        PS1='\[\e]0;$TITLEPREFIX:${PWD//[^[:ascii:]]/?}\007\]\n\[\e[32m\]\u@\h \[\e[35m\]$MSYSTEM \[\e[33m\]\w\[\e[36m\] $(__git_ps1 "(%s)")\[\e[0m\]\n$ '
+    else
+        PS1='\[\e]0;$TITLEPREFIX:${PWD//[^[:ascii:]]/?}\007\]\n\[\e[32m\]\u@\h \[\e[35m\]$MSYSTEM \[\e[33m\]\w\[\e[0m\]\n$ '
+    fi
 else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+    PS1='\[\e]0;$TITLEPREFIX:${PWD//[^[:ascii:]]/?}\007\]\n\u@\h $MSYSTEM \w\n$ '
 fi
-unset color_prompt force_color_prompt
+unset color_prompt force_color_prompt git_prompt
 
 # If this is an xterm set the title to user@host:dir
 case "$TERM" in
